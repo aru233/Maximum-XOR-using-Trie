@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define f(i,a,b) for(ll i=a;i<b;i++)
+#define rf(i,a,b) for(ll i=a;i>=b;i--)
+#define BASE 2
+#define NUM_BITS 64
+
+class TrieNode{
+public:
+	TrieNode *left;//represents bit 0
+	TrieNode *right;//represents bit 1
+};
+
+// ll countBits=0;
+
+void insertInTrie(ll elem, TrieNode* root);
+ll fastpow(ll x, ll y);
+ll findMaxXor(ll elem, TrieNode* root);
+
+int main(){
+	ll n, elem, x,q;
+	// cin>>n>>q;
+	cin>>n;
+	TrieNode *root=new TrieNode();
+	f(i,0,n){
+		cin>>elem;
+		insertInTrie(elem, root);
+	}
+	cin>>q;
+	while(q--){
+		cin>>x;
+		cout<<findMaxXor(x, root)<<endl;
+	}
+
+}
+
+void insertInTrie(ll elem, TrieNode* root){
+	TrieNode *ptr=root;
+	rf(i,NUM_BITS-1,0){
+		ll bt=(elem>>i)&1;//Starting with the MSB
+		// cout<<"bit = "<<bt<<" "<<endl;
+		switch(bt){
+			case 0://if 0 bit, insert at the left child
+				if(ptr->left==NULL){
+					ptr->left=new TrieNode();
+				}
+				ptr=ptr->left;
+				break;
+			case 1://if 1 bit, insert at the right child
+				if(ptr->right==NULL){
+					ptr->right=new TrieNode();
+				}
+				ptr=ptr->right;
+				break;
+		}
+	}
+}
+
+ll fastpow(ll x, ll y){
+	ll res=1;
+	while(y>0){
+		if(y%2==0){
+			res*=x;
+		}
+		x*=x;
+		y/=2;
+	}
+	return res;
+}
+
+ll findMaxXor(ll elem, TrieNode* root){
+	ll mxor=0, bt;
+	TrieNode *ptr=root;
+	// cout<<"x "<<elem<<endl;
+	rf(i,NUM_BITS-1,0){
+		int shft=elem>>i;
+		bt=(elem>>i)&1;
+		//cout<<"bit = " <<bt; 
+		// cout<<"elem$$i : "<<shft<<", bit"<<i<<": "<<bt<<endl;
+		switch(bt){
+			case 0://if 0 bit, go to the right child to find max XOR
+				if(ptr->right!=NULL){
+					mxor+=pow(BASE,i);
+					ptr=ptr->right;
+				}
+				else if(ptr->left){
+					ptr=ptr->left;
+				}
+				
+				break;
+			case 1://if 1 bit, go to the left child to find max XOR
+				if(ptr->left!=NULL){
+					mxor+=pow(BASE,i);
+					ptr=ptr->left;
+				}
+				else if(ptr->right){
+					ptr=ptr->right;
+				}
+				break;
+		}
+		// cout<<"max xor so far: "<<mxor<<endl;
+	}
+	return mxor;
+}
